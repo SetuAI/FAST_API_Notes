@@ -2,10 +2,11 @@
 Building a small endpoint
 When hit, it shows "hello world" in the output. 
 And then another endpoint that shows "about" the business.
+And then building couple of other endpoints as well.
 
 '''
 import json
-from fastapi import FastAPI
+from fastapi import FastAPI,Path,HTTPException
 
 # app object 
 app = FastAPI()
@@ -48,10 +49,22 @@ def load_data():
     return data
 
 # create an endpoint called "View"
-# as soon as someone hits the endpoint, it will return all the records of the patients
+# as soon as someone hits the endpoint, it will return all the records of the patients (records from the patients.json file)
 
 @app.get("/view")
-
 def view():
     data = load_data() # fetch data using load_Data function
     return data
+
+@app.get("/patient/{patient_id}")  # adding dynamic segment called {patient_id}
+def view_patient(patient_id: str=Path(..., description='ID of the patient in DB',
+                                      example = 'P001')): # if you look at patient id , it is a string "P001" , hence we take str
+    # load all the patients data
+    data = load_data()
+    if patient_id in data:
+        return data[patient_id]
+    raise HTTPException(status_code=404, detail="Patient not found")
+
+# Once executed this code, check : http://127.0.0.1:8000/patient/P001
+# checking the data here for 1st patient.
+# you can also go to /docs and see the documentation 
